@@ -76,6 +76,7 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
   (shell-command "git pull --rebase")
 
+  ;; testing in org-mode, we should test this I guess.          
   (org-save-outline-visibility t
     (revert-buffer nil t))
 
