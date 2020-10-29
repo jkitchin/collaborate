@@ -75,7 +75,10 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 	   (buffer-file-name)))
 
   (shell-command "git pull --rebase")
-  (revert-buffer nil t)
+
+  (org-save-outline-visibility t
+    (revert-buffer nil t))
+
   (shell-command "git push")
   (message "things seem to be synced"))
 
@@ -91,7 +94,8 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
 (defun agave-idle ()
   (when (> (- (float-time) last-change) idle-update-delay)
-    (agave-sync-buffer)))
+    (agave-sync-buffer)
+    (message "idle update!")))
 
 (add-hook 'first-change-hook 'agave-idle nil t)
 #+END_SRC
@@ -107,3 +111,5 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 3. not hitting github more than 5000 times an hour. Maybe we can solve that by trying to keep track of the rate of requests, and throttling as desired.
 
 Should I add a save buffer sync too?
+
+ok, I think the revert-buffer may be annoying because it may collapse my org buffer.
