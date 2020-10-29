@@ -1,6 +1,6 @@
 * conspire emacs real time editing
 
-** overview of
+** overview of cons
 https://github.com/technomancy/conspire
 
 This is an old project that simulates real time collaborative editing with git for communication. It is a combination of elisp and ruby. Here is my best interpretation of how it works.
