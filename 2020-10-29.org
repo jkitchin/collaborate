@@ -62,22 +62,30 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
 
 (defun agave-sync-buffer ()
+
+  ;; suppress save hooks that seem to trim white space and that do other
+  ;; things. This may not be totally desirable, and we may want a proper
+  ;; buffer exit hook that calls save-buffer to do what you need.
+
   (let ((before-save-hook ())
 	(after-save-hook ())
 	(message-log-max nil)		;disable logging
 	(inhibit-message t)) ;; this should  suppress messages to the minibuffer
     (save-buffer)
     (setq last-change (float-time)))
-  ;; this
-  (shell-command "git add")
-  )
+
+  (shell-command
+   (format "git add %s && git commit -m \"agave commit\""
+	   (buffer-file-name)))
+
+  (shell-command "git pull --rebase")
+  (revert-buffer nil t))
+
+
 (defun agave (start end len)
   (incf nchanges)
   (when (or (= (mod nchanges change-interval) 0)
 	    (> len change-interval))
-    ;; suppress save hooks that seem to trim white space and that do other
-    ;; things. This may not be totally desirable, and we may want a proper
-    ;; buffer exit hook that calls save-buffer to do what you need.
 
     (message "committing %s" nchanges)))
 
