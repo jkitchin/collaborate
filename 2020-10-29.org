@@ -129,6 +129,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 #+END_SRC
 
 #+RESULTS:
+| agave-idle | t |
 
 
 ok. I think these will do what we want. I guess while furiously typing, it will update every 5 characters. if you want more than 5 seconds, an idle update occurs. Then we just need to hook this into the git machinery. To do real time work, you would have to run a minor mode that sets up these hooks, and I think then you just type away. The only big issues there could be are:
@@ -139,4 +140,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 
 Should I add a save buffer sync too?
 
-ok, it is not ok to use this. we will have to setup some asynchronous things with sentinel functions
+   
