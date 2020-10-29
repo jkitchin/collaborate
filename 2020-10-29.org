@@ -115,4 +115,4 @@ Should I add a save buffer sync too?
 
 ok, I think the revert-buffer may be annoying because it may collapse my org buffer.
 
-how bad is the delay when running?   why does it
+ok  
