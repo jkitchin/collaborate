@@ -1,0 +1,105 @@
+* conspire emacs real time editing
+
+https://github.com/technomancy/conspire
+
+This is an old project that simulates real time collaborative editing with git for communication. It is a combination of elisp and ruby. Here is my best interpretation of how it works.
+
+You visit a file, and invoke M-x conspire-mode
+
+this is defined in https://github.com/technomancy/conspire/blob/master/lib/conspire/support/conspire.el
+
+
+When you enter conspire mode, it runs:
+
+#+BEGIN_SRC sh
+conspire filename options
+#+END_SRC
+
+and then sets an idle timer.
+
+The idle timer runs every 0.25 seconds and it runs ~conspire-sync-buffer~
+
+That function saves the buffer, and then runs git add and git commit.  then reverts the buffer, cancels the timer, and re-enters conspire-mode.
+
+** conspire function
+
+defined in https://github.com/technomancy/conspire/blob/master/bin/conspire as a ruby script
+
+this just gets options, and runs the conspire sync_loop
+
+the conspire lib is at https://github.com/technomancy/conspire/blob/master/lib/conspire.rb
+
+
+this seems to do some discovery on the network for the conspirators. A conspirator is a class defined at https://github.com/technomancy/conspire/blob/master/lib/conspire/conspirator.rb
+
+this is where a sync operation occurs, which is a pull --rebase from a url
+
+is it possible this makes every client update?
+
+this uses gitjour https://github.com/chad/gitjour which I guess lets you serve git repos over a local network. I guess it is an easy way to serve a directory as a name on the network, and then others can pull it that way (https://www.rubydoc.info/gems/technomancy-gitjour)
+
+** An all elisp implementation?
+
+This makes me wonder if we can do this in an all elisp way. I guess we still use an idle-timer to git commit changes in the repo. Maybe, we use an async shell command to git pull rebase.
+
+We should be concerned about rate limits with something like github, at 4 times a second we would exceed the rate of 5000 requests per hour. We probably should not do it that often. One way to solve that is to only push when we know we have changed the buffer.
+
+A dilemma though is while I am idle, the remote server could be changing. so when I come back, before editing I need a way to to pull/revert before typing. almost like a pre-change hook, or idle-break hook
+
+Maybe i can use  first-change-hook for this. presumably my buffer will be in a saved state.
+
+ok, here could be a work flow. Instead of an idle timer, we use ~after-change-functions~ to accumulate N changes, and when N=5 say, we do the add/commit and pull-rebase commands.
+
+
+
+
+
+#+BEGIN_SRC emacs-lisp
+(defvar nchanges 0 "Counter for changes")
+(defvar change-interval 5 "This many changes updates")
+(defvar last-change 0 "Float time for last change")
+(defvar idle-update-delta 5 "If this time has passed we will do an update")
+
+
+(defun agave-sync-buffer ()
+  (let ((before-save-hook ())
+	(after-save-hook ())
+	(message-log-max nil)		;disable logging
+	(inhibit-message t)) ;; this should  suppress messages to the minibuffer
+    (save-buffer)
+    (setq last-change (float-time)))
+  ;; this
+  (shell-command "git add")
+  )
+(defun agave (start end len)
+  (incf nchanges)
+  (when (or (= (mod nchanges change-interval) 0)
+	    (> len change-interval))
+    ;; suppress save hooks that seem to trim white space and that do other
+    ;; things. This may not be totally desirable, and we may want a proper
+    ;; buffer exit hook that calls save-buffer to do what you need.
+
+    (message "committing %s" nchanges)))
+
+(add-hook 'after-change-functions 'agave nil t)
+#+END_SRC
+
+#+RESULTS:
+| agave |
+
+
+Now, what to do about the exiting from idle time. This way seems to run things twice. since we save in agave, the first change after it makes this run straight away. Maybe a heuristic approach, e.g. track time and only run this if it is some interval past the last time.
+
+#+BEGIN_SRC emacs-lisp
+(defun agave-idle ()
+  (when (> (- (float-time) last-change) idle-update-delay)
+    (message "idle update")))
+
+(add-hook 'first-change-hook 'agave-idle nil t)
+#+END_SRC
+
+ok. I think these will do what we want. I guess while furiously typing, it will update every 5 characters. if you want more than 5 seconds, an idle update occurs. Then we just need to hook this into the git machinery. To do real time work, you would have to run a minor mode that sets up these hooks, and I think then you just type away. The only big issues there could be are:
+
+1. performance - text should be small things, and easy, but if someone adds a big file you might wait for it. some of this might be doable with async commands to mitigate that.
+2. conflicts.
+3. not hitting github more than 5000 times an hour. Maybe we can solve that by trying to keep track of the rate of requests, and throttling as desired.
