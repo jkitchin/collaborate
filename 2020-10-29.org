@@ -85,23 +85,28 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
   ;; This is not fast, and we should have it run asynchronously, and when done
   ;; revert the buffer if we need to
-  (setq agave-proc
-	(async-start
-	 (lambda ()
-	   (shell-command "git pull --rebase"))
-	 (lambda (result)
-	   (message "done: %s" result)
-	   (unless (verify-visited-file-modtime)
-	     (if org-mode
-		 (org-save-outline-visibility t
+  (if (null agave-proc)
+      (setq agave-proc
+	    (async-start
+	     (lambda ()
+	       (shell-command "git pull --rebase"))
+	     (lambda (result)
+	       (message "done: %s" result)
+	       (unless (verify-visited-file-modtime)
+		 (if org-mode
+		     (org-save-outline-visibility t
+		       (revert-buffer nil t))
 		   (revert-buffer nil t))
-	       (revert-buffer nil t))
-	     ;; noted in conspire.el that revert-buffer kills local variables...
-	     (add-hook 'after-change-functions 'agave nil t)
-	     (add-hook 'first-change-hook 'agave-idle nil t)))))
-
-  ;; now, we can push
-  (shell-command "git push"))
+		 ;; noted in conspire.el that revert-buffer kills local variables...
+		 (add-hook 'after-change-functions 'agave nil t)
+		 (add-hook 'first-change-hook 'agave-idle nil t)))
+	     ;; now we can push
+	     (setq agave-proc
+		   (lambda ()
+		     (shell-command "git push")
+		     (setq agave-proc nil))
+		   'ignore)))
+    (message "last update still working, we will try later.")))
 
 
 (defun agave (start end len)
@@ -124,7 +129,7 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
 #+RESULTS:
 | agave-idle | t |
-
+   
 
 ok. I think these will do what we want. I guess while furiously typing, it will update every 5 characters. if you want more than 5 seconds, an idle update occurs. Then we just need to hook this into the git machinery. To do real time work, you would have to run a minor mode that sets up these hooks, and I think then you just type away. The only big issues there could be are:
 
