@@ -103,7 +103,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 	     (setq agave-proc
 		   (async-start
 		    (lambda ()
-		      (message "running push in 
+		      (message "running push in %s"
 		      (shell-command "git push")
 		      (setq agave-proc nil))
 		    'ignore))))
