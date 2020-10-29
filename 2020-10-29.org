@@ -133,4 +133,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 2. conflicts.
 3. not hitting github more than 5000 times an hour. Maybe we can solve that by trying to keep track of the rate of requests, and throttling as desired.
 
-Should I add a save or kill  buffer sync too? this will happen w
+Should I add a save or kill       buffer sync too? this will happen w
