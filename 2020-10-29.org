@@ -125,7 +125,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 #+RESULTS:
 | agave-idle | t |
 
-
+     
 ok. I think these will do what we want. I guess while furiously typing, it will update every 5 characters. if you want more than 5 seconds, an idle update occurs. Then we just need to hook this into the git machinery. To do real time work, you would have to run a minor mode that sets up these hooks, and I think then you just type away. The only big issues there could be are:
 
 1. performance - text should be small things, and easy, but if someone adds a big file you might wait for it. some of this might be doable with async commands to mitigate that.
