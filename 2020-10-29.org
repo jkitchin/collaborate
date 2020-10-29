@@ -90,7 +90,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 	     (lambda ()
 	       (shell-command "git pull --rebase"))
 	     (lambda (result)
-	       (message "***************done: %s" result)
+	       (message "**************** done: %s" result)
 	       (unless (verify-visited-file-modtime)
 		 (if org-mode
 		     (org-save-outline-visibility t
@@ -102,7 +102,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 
 		 ;; now we push
 		 (message "pushing")
-		 (async-shell-command "git push"))))))))
+		 (async-shell-command "git push")))))))
 
 
 (defun agave (start end len)
@@ -133,4 +133,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 2. conflicts.
 3. not hitting github more than 5000 times an hour. Maybe we can solve that by trying to keep track of the rate of requests, and throttling as desired.
 
-Should I add a save buffer sync too?
+Should I add a save buffer sync too? 
