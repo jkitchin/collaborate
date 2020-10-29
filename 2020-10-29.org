@@ -134,4 +134,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 
 Should I add a save buffer sync too?
 
-ok, it is not ok to use this. we will have to setup some asynchronous things with sentinel functions
+ok, it is not ok to use this. we will have to setup some asynchronous things with sentinel functions     
