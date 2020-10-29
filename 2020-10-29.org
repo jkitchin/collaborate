@@ -90,7 +90,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 	     (lambda ()
 	       (shell-command "git pull --rebase"))
 	     (lambda (result)
-	       (message "*****done: %s" result)
+	       (message "**********done: %s" result)
 	       (unless (verify-visited-file-modtime)
 		 (if org-mode
 		     (org-save-outline-visibility t
