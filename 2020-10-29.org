@@ -51,10 +51,18 @@ Maybe i can use  first-change-hook for this. presumably my buffer will be in a s
 ok, here could be a work flow. Instead of an idle timer, we use ~after-change-functions~ to accumulate N changes, and when N=5 say, we do the add/commit and pull-rebase commands.
 
 #+BEGIN_SRC emacs-lisp
+(require 'async)
+
 (defvar nchanges 0 "Counter for changes")
 (defvar change-interval 5 "This many changes updates")
 (defvar last-change 0 "Float time for last change")
 (defvar idle-update-delta 5 "If this time has passed we will do an update")
+
+(defvar agave-proc nil)
+
+
+
+
 
 
 (defun agave-sync-buffer ()
@@ -70,22 +78,30 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
     (save-buffer)
     (setq last-change (float-time)))
 
+  ;; I think this is fast, and we can just shell-cmd it.
   (shell-command
    (format "git add %s && git commit -m \"agave commit\""
 	   (buffer-file-name)))
 
-  (shell-command "git pull --rebase")
+  ;; This is not fast, and we should have it run asynchronously, and when done
+  ;; revert the buffer if we need to
+  (setq agave-proc
+	(async-start
+	 (lambda ()
+	   (shell-command "git pull --rebase"))
+	 (lambda (result)
+	   (message "done: %s" result)
+	   (unless (verify-visited-file-modtime)
+	     (if org-mode
+		 (org-save-outline-visibility t
+		   (revert-buffer nil t))
+	       (revert-buffer nil t))
+	     ;; noted in conspire.el that revert-buffer kills local variables...
+	     (add-hook 'after-change-functions 'agave nil t)
+	     (add-hook 'first-change-hook 'agave-idle nil t)))))
 
-  ;; testing in org-mode, we should test this I guess.
-  (org-save-outline-visibility t
-    (revert-buffer nil t))
-
-  ;; noted in conspire.el that revert-buffer kills local variables...
-  (add-hook 'after-change-functions 'agave nil t)
-  (add-hook 'first-change-hook 'agave-idle nil t)  
-
-  (shell-command "git push")
-  (message "things seem to be synced"))
+  ;; now, we can push
+  (shell-command "git push"))
 
 
 (defun agave (start end len)
@@ -118,4 +134,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 
 Should I add a save buffer sync too?
 
-ok, it is mildly annoying fjdkas
+ok, it is not ok to use this. we will have to setup some asynchronous things with sentinel functions
