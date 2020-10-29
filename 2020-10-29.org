@@ -118,4 +118,4 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 
 Should I add a save buffer sync too?
 
-ok
+ok, it 
