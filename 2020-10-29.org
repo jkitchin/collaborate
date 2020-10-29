@@ -98,7 +98,7 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
     (agave-sync-buffer)
     (message "idle update!")))
 
-(add-hook 'first-change-hook 'agave-idle nil t)  
+(add-hook 'first-change-hook 'agave-idle nil t)     
 #+END_SRC
 
 #+RESULTS:
@@ -114,3 +114,5 @@ ok. I think these will do what we want. I guess while furiously typing, it will 
 Should I add a save buffer sync too?
 
 ok, I think the revert-buffer may be annoying because it may collapse my org buffer.
+
+how bad is the delay when running?   
