@@ -51,7 +51,7 @@ Maybe i can use  first-change-hook for this. presumably my buffer will be in a s
 
 ok, here could be a work flow. Instead of an idle timer, we use ~after-change-functions~ to accumulate N changes, and when N=5 say, we do the add/commit and pull-rebase commands.
 
-It seems important to use async for these. Hopfully I can use nested asyncs
+It seems important to use async for these. Hopfully I can use nested asyncs....
 
 #+BEGIN_SRC emacs-lisp
 (require 'async)
