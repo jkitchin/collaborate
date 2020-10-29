@@ -61,7 +61,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 (defvar last-change 0 "Float time for last change")
 (defvar idle-update-delta 5 "If this time has passed we will do an update")
 
-(defvar agave-proc nil)
+(defvar agave-pull nil)
 
 
 (defun agave-sync-buffer ()
@@ -85,7 +85,7 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
   ;; This is not fast, and we should have it run asynchronously, and when done
   ;; revert the buffer if we need to
   (if (null agave-proc)
-      (setq agave-proc
+      (setq agave-pull
 	    (async-start
 	     (lambda ()
 	       (shell-command "git pull --rebase"))
@@ -98,16 +98,10 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 		   (revert-buffer nil t))
 		 ;; noted in conspire.el that revert-buffer kills local variables...
 		 (add-hook 'after-change-functions 'agave nil t)
-		 (add-hook 'first-change-hook 'agave-idle nil t)))
-	     ;; now we can push
-	     (setq agave-proc
-		   (async-start
-		    (lambda ()
-		      (message "running push in %s" default-directory)
-		      (shell-command "git push")
-		      (setq agave-proc nil))
-		    'ignore))))
-    (message "last update still working, we will try later.")))
+		 (add-hook 'first-change-hook 'agave-idle nil t)
+
+		 ;; now we push
+		 (async-shell-command "git push"))))))))
 
 
 (defun agave (start end len)
