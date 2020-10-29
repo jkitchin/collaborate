@@ -51,7 +51,7 @@ Maybe i can use  first-change-hook for this. presumably my buffer will be in a s
 
 ok, here could be a work flow. Instead of an idle timer, we use ~after-change-functions~ to accumulate N changes, and when N=5 say, we do the add/commit and pull-rebase commands.
 
-It seems important to use async for these. Hopefully I can use nested asyncs....
+It seems important to use async for these. efully I can use nested asyncs....
 
 #+BEGIN_SRC emacs-lisp
 (require 'async)
@@ -84,25 +84,22 @@ It seems important to use async for these. Hopefully I can use nested asyncs....
 
   ;; This is not fast, and we should have it run asynchronously, and when done
   ;; revert the buffer if we need to
-  (if (null agave-proc)
-      (setq agave-pull
-	    (async-start
-	     (lambda ()
-	       (shell-command "git pull --rebase"))
-	     (lambda (result)
-	       (message "**************** done: %s" result)
-	       (unless (verify-visited-file-modtime)
-		 (if org-mode
-		     (org-save-outline-visibility t
-		       (revert-buffer nil t))
-		   (revert-buffer nil t))
-		 ;; noted in conspire.el that revert-buffer kills local variables...
-		 (add-hook 'after-change-functions 'agave nil t)
-		 (add-hook 'first-change-hook 'agave-idle nil t)
-
-		 ;; now we push
-		 (message "pushing")
-		 (async-shell-command "git push")))))))
+  (async-start
+   (lambda ()
+     (shell-command "git pull --rebase"))
+   (lambda (result)
+     (message "**************** done: %s" result)
+     (unless (verify-visited-file-modtime)
+       (if org-mode
+	   (org-save-outline-visibility t
+	     (revert-buffer nil t))
+	 (revert-buffer nil t))
+       ;; noted in conspire.el that revert-buffer kills local variables...
+       (add-hook 'after-change-functions 'agave nil t)
+       (add-hook 'first-change-hook 'agave-idle nil t))
+     ;; now we push
+     (message "pushing")
+     (async-shell-command "git push"))))
 
 
 (defun agave (start end len)
