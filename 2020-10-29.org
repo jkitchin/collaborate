@@ -62,7 +62,6 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 (defvar agave-proc nil)
 
 
-
 (defun agave-sync-buffer ()
 
   ;; suppress save hooks that seem to trim white space and that do other
@@ -100,10 +99,11 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 		 (add-hook 'first-change-hook 'agave-idle nil t)))
 	     ;; now we can push
 	     (setq agave-proc
-		   (lambda ()
-		     (shell-command "git push")
-		     (setq agave-proc nil))
-		   'ignore)))
+		   (async-start
+		    (lambda ()
+		      (shell-command "git push")
+		      (setq agave-proc nil))
+		    'ignore))))
     (message "last update still working, we will try later.")))
 
 
