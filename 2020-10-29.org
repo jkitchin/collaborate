@@ -63,9 +63,6 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
 
 
-
-
-
 (defun agave-sync-buffer ()
 
   ;; suppress save hooks that seem to trim white space and that do other
