@@ -85,20 +85,20 @@ ok, here could be a work flow. Instead of an idle timer, we use ~after-change-fu
 
 
 (defun agave (start end len)
-  (message "running agave")
+  (message "running agave")  
   (incf nchanges)
   (when (= (mod nchanges change-interval) 0)
     (agave-sync-buffer)
     (message "committing %s" nchanges)))
 
-(add-hook 'after-change-functions 'agave nil t)
+(add-hook 'after-change-functions 'agave nil t)   
 
 (defun agave-idle ()
   (when (> (- (float-time) last-change) idle-update-delay)
     (agave-sync-buffer)
     (message "idle update!")))
 
-(add-hook 'first-change-hook 'agave-idle nil t)
+(add-hook 'first-change-hook 'agave-idle nil t)  
 #+END_SRC
 
 #+RESULTS:
